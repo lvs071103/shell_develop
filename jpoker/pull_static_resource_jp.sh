@@ -91,7 +91,7 @@ else
     exit 1
 fi
 
-ssh root@${IP} '/data/tmp/rsync_to_taipei.sh 1.0.0'
+ssh root@${IP} "/data/tmp/rsync_to_taipei.sh ${VERSION}"
 if [[ "$?" -eq 0 ]];then
     echo "jp rsync to taipei success!"
 else
