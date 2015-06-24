@@ -1,4 +1,6 @@
 #!/bin/sh
+#
+#
 
 if [[ "$#" -ne 1 ]];then
     echo "usage: $0 <svn_version>"
@@ -13,6 +15,16 @@ fi
 TAR_PATH=/data/deploy/tmp/${1}
 RES_V=$(date +%Y%m%d_%H%M%S)
 
+check_res()
+{
+    if [ -d "$TAR_PATH"/res ]; then
+        #echo "res is exist!"
+        return 0
+    else
+        #echo "First run pull_static_resource_to_jp.sh !"
+        return 1
+    fi
+}
 
 check_md5()
 {
@@ -27,10 +39,6 @@ check_md5()
 
 move_to_deploy()
 {
-    if [ ! -d "$TAR_PATH"/res ]; then
-        echo "$TAR_PATH/res is not exist!"
-        return 1
-    fi
     if [ ! -f "$TAR_PATH"/crossdomain.xml ];then
         echo "${TAR_PATH} not have crossdomain.xml file"
         return 1
@@ -70,6 +78,13 @@ make_symlink()
         return 1
     fi
 }
+
+if check_res;then
+    echo "check res is OK!"
+else
+    echo "check res is failed! first run pull_static_resource_to_jp.sh"
+    exit 1
+fi
 
 if check_md5;then
     echo "check md5 is OK !"
