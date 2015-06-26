@@ -1,4 +1,6 @@
 #!/bin/sh
+#
+#
 
 if [ "$#" -ne 1 ];then
     echo "usage: $0 <svn_version>"
@@ -15,36 +17,38 @@ RES_V=$(date +%Y%m%d_%H%M%S)
 SVN_USER=""
 SVN_PASS=""
 SVN_URL=https://192.168.1.72/svn/poker_as_deploy/branches/${VERSION}
-TAR_PATH=/data/deploy/tmp
-IP=
+TMP_PATH=/data/deploy/tmp
+JUMP_IP=
 
 checkout()
 {
-    if [ -d "$TAR_PATH"/"$VERSION" ]; then
-        rm -rf  ${TAR_PATH}/${VERSION}
+    if [ -d "$TMP_PATH"/"$VERSION" ]; then
+        rm -rf  ${TMP_PATH}/${VERSION}
         echo "delete old version success!"
     fi
-    svn checkout --non-interactive --trust-server-cert --username ${SVN_USER} --password ${SVN_PASS} ${SVN_URL} ${TAR_PATH}/${VERSION} >> /var/log/pull_cdn.log
+    svn checkout --non-interactive --trust-server-cert --username ${SVN_USER} --password ${SVN_PASS} ${SVN_URL} ${TMP_PATH}/${VERSION} >> /var/log/pull_cdn.log
     if [[ $? -eq 0 ]];then
-        echo "svn checkout success!"
-        cd ${TAR_PATH}
-        svn export ${VERSION} res
-        if [[ $? -eq 0 ]]; then
-            echo "svn export complete!"
-        else
-            echo "svn export failed!"
-            exit 1
-        fi
+        return 0
     else
-        echo "svn checkout failed!"
-        exit 1
+        return 1
+    fi
+}
+
+export_to_res()
+{
+    cd ${TMP_PATH}
+    svn export ${VERSION} res
+    if [[ $? -eq 0 ]]; then
+        return 0
+    else
+        return 1
     fi
 }
 
 move_to_deploy()
 {
-    if [ ! -d "$TAR_PATH"/res ]; then
-        echo "$TAR_PATH/res is not exist!"
+    if [ ! -d "$TMP_PATH"/res ]; then
+        echo "$TMP_PATH/res is not exist!"
         return 1
     fi
 
@@ -52,8 +56,8 @@ move_to_deploy()
         mkdir /data/deploy/${RES_V}
     fi
 
-    mv ${TAR_PATH}/res /data/deploy/${RES_V}
-    /bin/cp ${TAR_PATH}/crossdomain.xml /data/deploy/${RES_V}
+    mv ${TMP_PATH}/res /data/deploy/${RES_V}
+    /bin/cp ${TMP_PATH}/crossdomain.xml /data/deploy/${RES_V}
     if [  -d /data/deploy/${RES_V}/res ] && [ -e  /data/deploy/${RES_V}/crossdomain.xml ]; then
         return 0
     else
@@ -62,8 +66,16 @@ move_to_deploy()
 }
 
 if checkout; then
-    echo "checkout completed next-->move res directory" >> /var/log/pull_cdn.log
+    echo "svn checkout is complete!"
 else
+    echo "svn checkout is failed!"
+    exit 1
+fi
+
+if export_to_res; then
+    echo "export to res is complete!"
+else
+    echo "export to res is failed!"
     exit 1
 fi
 
@@ -83,7 +95,7 @@ else
     exit 1
 fi
 
-rsync -avzup --delete  /data/deploy/${RES_V}/*  root@${IP}:/data/tmp/${VERSION} >/var/log/pub_jp.log
+rsync -avzup --delete  /data/deploy/${RES_V}/*  root@${JUMP_IP}:/data/tmp/${VERSION} >/var/log/pub_jp.log
 if [[ "$?" -eq 0 ]];then
     echo "rsync to jp is success! version: ${VERSION}"
 else
@@ -91,7 +103,7 @@ else
     exit 1
 fi
 
-ssh root@${IP} "/data/tmp/rsync_to_taipei.sh ${VERSION}"
+ssh root@${JUMP_IP} "/data/tmp/rsync_to_taipei.sh ${VERSION}"
 if [[ "$?" -eq 0 ]];then
     echo "jp rsync to taipei success!"
 else
