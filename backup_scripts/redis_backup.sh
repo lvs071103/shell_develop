@@ -5,19 +5,19 @@ if [[ $UID -ne 0 ]]; then
         exit
 fi
 
-localtime=`date +%Y%m%d_%H%M`
-backup_server_name=s1
+HOSTNAME=$(/bin/hostname)
+localtime=$(date +%Y%m%d_%H%M)
 
 port=($(netstat -lntp | grep redis-server | awk '{print $4}' | awk '{split($0,ports,":");print ports[length(ports)]}' | sort | uniq))
 num=${#port[@]}
 
-backup_file_name_6379=redis_${backup_server_name}_6379_${localtime}.tar.gz
-backup_file_name_6380=redis_${backup_server_name}_6380_${localtime}.tar.gz
+backup_file_name_6379=redis_${HOSTNAME}_6379_${localtime}.tar.gz
+backup_file_name_6380=redis_${HOSTNAME}_6380_${localtime}.tar.gz
 backup_path=/data/backup/redis/local
 
 if [[ $num -eq 0 ]];then
     echo -e "\n\033[40;31m No redis server is running\033[0m\n"
-    exit 1
+    exit
 fi
 
 #压缩
@@ -29,7 +29,7 @@ for i in ${port[@]};do
         cd /data/redis/var-6380
         tar czvf ${backup_file_name_6380} dump.rdb
     else
-        exit 1
+        echo "zip failed!" && exit 1
     fi
 done
 #移动
