@@ -1,0 +1,13 @@
+/data/mysql/mysql-slow.log {
+    daily
+    rotate 7
+    dateext
+    compress
+    missingok
+    #notifempty
+    sharedscripts
+    create 644 mysql mysql
+    postrotate
+        /data/mysql/bin/mysqladmin flush-logs
+    endscript
+}
