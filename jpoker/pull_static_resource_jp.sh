@@ -95,7 +95,7 @@ else
     exit 1
 fi
 
-rsync -avzup --delete  /data/deploy/${RES_V}/*  root@${JUMP_IP}:/data/tmp/${VERSION} >/var/log/pub_jp.log
+rsync -avzup --delete  /data/deploy/${RES_V}/*  root@${JUMP_IP}:/data/tmp/${VERSION} >> /var/log/pull_cdn.log
 if [[ "$?" -eq 0 ]];then
     echo "rsync to jp is success! version: ${VERSION}"
 else
@@ -103,7 +103,7 @@ else
     exit 1
 fi
 
-ssh root@${JUMP_IP} "/data/tmp/rsync_to_taipei.sh ${VERSION}"
+ssh root@${JUMP_IP} "/data/tmp/rsync_to_taipei.sh ${VERSION}" >> /var/log/pull_cdn.log
 if [[ "$?" -eq 0 ]];then
     echo "jp rsync to taipei success!"
 else

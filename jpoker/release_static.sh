@@ -18,10 +18,8 @@ RES_V=$(date +%Y%m%d_%H%M%S)
 check_res()
 {
     if [ -d "$TAR_PATH"/res ]; then
-        #echo "res is exist!"
         return 0
     else
-        #echo "First run pull_static_resource_to_jp.sh !"
         return 1
     fi
 }
@@ -39,7 +37,7 @@ check_md5()
 
 move_to_deploy()
 {
-    if [ ! -f "$TAR_PATH"/crossdomain.xml ];then
+    if [ ! -e "$TAR_PATH"/crossdomain.xml ];then
         echo "${TAR_PATH} not have crossdomain.xml file"
         return 1
     fi
@@ -108,7 +106,7 @@ else
 fi
 
 if make_symlink;then
-    echo "make symlink success!"
+    echo "make symlink success! update finished!"
 else
     echo "make symlink failed!"
     exit 1
