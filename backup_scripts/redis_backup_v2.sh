@@ -20,7 +20,7 @@ fi
 
 #zip
 for i in ${PORT[@]};do
-	cd /data/redis/var-${i}
+	cd /data/redis/var_${i}
 	tar czvf ${HOSTNAME}_redis_${i}_${LOCALTIME}.tar.gz dump.rdb
 done
 
