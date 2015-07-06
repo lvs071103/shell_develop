@@ -1,7 +1,7 @@
 #!/bin/sh
 #
-#defined redis1 data path like: /data/redis/var-6379 ----> port:6379
-#defined redis2 data path like: /data/redis/var-6380 ----> port:6380
+#defined redis1 data path like: /data/redis/var_6379 ----> port:6379
+#defined redis2 data path like: /data/redis/var_6380 ----> port:6380
 
 if [[ $UID -ne 0 ]]; then
         echo "You must run as root"
