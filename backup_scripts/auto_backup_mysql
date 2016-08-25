@@ -1,0 +1,41 @@
+#!/bin/bash
+# dependent mysql_config_editor set --login-path=local --host=localhost --user=username --password
+
+dbs=$(/data/lnmp/mysql/bin/mysql --login-path='local' -e 'show databases;' | awk '{ print $1 }')
+target_path=/data/db_backup
+timestamp=$(date +%Y%m%d_%H%M%S)
+
+if [ "$UID" -ne 0 ];then
+	echo "You must run as root"
+	exit
+fi
+
+if [ ! -d ${target_path}/${timestamp} ];then
+	mkdir -p ${target_path}/${timestamp}
+fi
+
+for db in ${dbs[@]};do
+	if [ "$db" = 'Database' ] || [ "$db" = 'information_schema' ] || \
+	[ "$db" = 'performance_schema' ] || [ "$db" = 'mysql' ];then
+		:
+	else
+		/data/lnmp/mysql/bin/mysqldump --login-path='local' ${db} > ${target_path}/${timestamp}/${db}.sql
+		if [ $? -eq 0 ];then
+			echo "${db} backup success."
+		else
+			echo "${db} backup failed."
+			exit 1
+		fi
+	fi
+done
+
+cd ${target_path}/
+zip ${timestamp}.zip -r ${timestamp}/
+if [ "$?" -eq 0 ];then
+	echo "compress success."
+	rm -rf ${timestamp}
+	exit 0
+else
+	echo "compress faild."
+	exit 1
+fi
