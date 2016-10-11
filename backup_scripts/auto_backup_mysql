@@ -30,7 +30,7 @@ for db in ${dbs[@]};do
 done
 
 cd ${target_path}/
-zip ${timestamp}.zip -r ${timestamp}/
+tar czf ${timestamp}.tar.gz ${timestamp}/
 if [ "$?" -eq 0 ];then
 	echo "compress success."
 	rm -rf ${timestamp}
