@@ -49,7 +49,7 @@ stopDaemon()
   fi
   if [ ! -z `pidof ${binaryName}` ];then
     kill -2 `pidof ${binaryName}` &> /dev/null
-    while True:
+    while :
     do
       checkPidExists
       num=$?
